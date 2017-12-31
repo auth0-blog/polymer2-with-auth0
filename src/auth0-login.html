@@ -1,0 +1,138 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-localstorage/iron-localstorage.html">
+<link rel="import" href="../bower_components/brum-global-variable/brum-global-variable.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="auth0-js.html">
+
+<dom-module id="auth0-login">
+  <template>
+    <style>
+      :host {
+        color: #fff;
+        font-size: 13px;
+      }
+      .greeting {
+        border-right: 1px solid rgba(255,255,255,.5);
+        display: inline-block;
+        padding-right: 6px;
+      }
+      .greeting img {
+        border-radius: 100px;
+        display: inline-block;
+        height: 24px;
+        margin-right: 4px;
+        vertical-align: middle;
+        width: 24px;
+      }
+      a {
+        color: #fff;
+      }
+      paper-button {
+        color: #fff;
+      }
+      paper-button.link {
+        color: #fff;
+        display: inline-block;
+        font-size: 13px;
+      }
+      paper-button.indigo {
+        background-color: var(--paper-indigo-500);
+        color: white;
+        --paper-button-raised-keyboard-focus: {
+          background-color: var(--paper-pink-a200) !important;
+          color: white !important;
+        };
+      }
+      paper-button.indigo:hover {
+        background-color: var(--paper-indigo-400);
+      }
+    </style>
+
+    <iron-localstorage name="user-storage" value="{{storedUser}}" on-iron-localstorage-load="_setProfileImg"></iron-localstorage>
+    <brum-global-variable key="userData" value="{{storedUser}}"></brum-global-variable>
+
+    <paper-button class="link" on-tap="authorize" hidden$="[[storedUser.loggedin]]">Log In</paper-button>
+
+    <div hidden$="[[!storedUser.loggedin]]">
+      <span class="greeting"><img src="[[profileImgSrc]]">[[storedUser.profile.nickname]]</span>
+      <paper-button class="link" on-tap="logOut">Log Out</paper-button>
+    </div>
+  </template>
+  <script>
+      (function() {
+          const webAuth = new auth0.WebAuth({
+              domain: 'lukeoliff.eu.auth0.com',
+              clientID: 'WCVMWtkMvBZjv3uQVKwZn52i3b1dNF6m',
+              responseType: 'token',
+              redirectUri: 'http://localhost:8081'
+          });
+
+          class Auth0Login extends Polymer.Element {
+              static get is() { return 'auth0-login'; }
+
+              static get properties() {
+                  return {
+                      clientId: String,
+                      domain: String,
+                      redirectUrl: String,
+                      storedUser: Object,
+                      auth0Lock: Object,
+                      profileImgSrc: {
+                          type: String,
+                          value: ''
+                      },
+                      webAuth: Object,
+                  }
+              }
+
+              connectedCallback() {
+                  super.connectedCallback();
+                  const _self = this;
+
+                  // Parse the hash
+                  if (window.location.hash) {
+                      webAuth.parseHash({ hash: window.location.hash }, function(error, authResult) {
+                          if (error) {
+                              console.error('Error reading hash:', error);
+                              return;
+                          }
+
+                          if (authResult) {
+                              webAuth.client.userInfo(authResult.accessToken, function(error, profile) {
+                                  if (error) {
+                                      console.error('Error getting profile:', error);
+                                      return;
+                                  }
+
+                                  _self.storedUser = {
+                                      name: profile.name,
+                                      id_token: authResult.idToken,
+                                      access_token: authResult.accessToken,
+                                      loggedin: true,
+                                      profile: profile
+                                  };
+                                  _self.profileImgSrc = profile.picture;
+                              });
+                          }
+                      });
+                  }
+              }
+
+              _setProfileImg() {
+                  this.profileImgSrc = this.storedUser.profile.picture;
+              }
+
+              authorize() {
+                  webAuth.authorize();
+              }
+
+              logOut() {
+                  this.storedUser = null;
+                  this.profileImgSrc = '';
+              }
+          }
+
+          window.customElements.define(Auth0Login.is, Auth0Login);
+      }());
+  </script>
+</dom-module>
