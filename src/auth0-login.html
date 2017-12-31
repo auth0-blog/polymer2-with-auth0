@@ -61,10 +61,10 @@
   <script>
       (function() {
           const webAuth = new auth0.WebAuth({
-              domain: 'lukeoliff.eu.auth0.com',
-              clientID: 'WCVMWtkMvBZjv3uQVKwZn52i3b1dNF6m',
+              domain: '<DOMAIN>',
+              clientID: '<CLIENTID>',
               responseType: 'token',
-              redirectUri: 'http://localhost:8081'
+              redirectUri: '<REDIRECT_URI>'
           });
 
           class Auth0Login extends Polymer.Element {
