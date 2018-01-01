@@ -1,4 +1,4 @@
-<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/iron-localstorage/iron-localstorage.html">
 <link rel="import" href="../bower_components/brum-global-variable/brum-global-variable.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
@@ -61,10 +61,10 @@
   <script>
       (function() {
           const webAuth = new auth0.WebAuth({
-              domain: '<DOMAIN>',
-              clientID: '<CLIENTID>',
+              domain: 'lukeoliff.eu.auth0.com',
+              clientID: 'WCVMWtkMvBZjv3uQVKwZn52i3b1dNF6m',
               responseType: 'token',
-              redirectUri: '<REDIRECT_URI>'
+              redirectUri: 'http://localhost:8081/'
           });
 
           class Auth0Login extends Polymer.Element {
@@ -72,16 +72,11 @@
 
               static get properties() {
                   return {
-                      clientId: String,
-                      domain: String,
-                      redirectUrl: String,
                       storedUser: Object,
-                      auth0Lock: Object,
                       profileImgSrc: {
                           type: String,
                           value: ''
-                      },
-                      webAuth: Object,
+                      }
                   }
               }
 
